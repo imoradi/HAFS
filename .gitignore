@@ -14,3 +14,5 @@
 system.conf
 fix/
 rocoto/*.xml
+sorc/hafs_jedi.fd
+*/build/
