@@ -326,10 +326,12 @@ mkdir ${DATA}/crtm
 cd ${DATA}/crtm
 
 #if [ -e $HOMEhafs/sorc/hafs_jedi.fd/build/lib/python3.11 ]; then
-# CRTM_TEMP="${PARMhafs}/../sorc/hafs_jedi.fd/bundle/test-data-release/crtm/3.0.0_skylab_6.0"
+CRTM_TEMP="${PARMhafs}/../sorc/hafs_jedi.fd/bundle/test-data-release/crtm/3.0.0_skylab_6.0"
 #else
-CRTM_TEMP="${PARMhafs}/../sorc/hafs_jedi.fd/bundle/test-data-release/crtm/2.4.1_skylab_4.0"
+#CRTM_TEMP="${PARMhafs}/../sorc/hafs_jedi.fd/bundle/test-data-release/crtm/2.4.1_skylab_4.0"
 #fi
+
+
 for file in $(awk '{if($1!~"!"){print $1}}' ${DATA}/satinfo | sort | uniq); do
   ${NLN} ${CRTM_TEMP}/SpcCoeff/Little_Endian/${file}.SpcCoeff.bin ./
   ${NLN} ${CRTM_TEMP}/TauCoeff/ODPS/Little_Endian/${file}.TauCoeff.bin ./
@@ -347,9 +349,14 @@ done
 ${NLN} ${CRTM_TEMP}/AerosolCoeff/Little_Endian/AerosolCoeff.bin ./AerosolCoeff.bin
 ${NLN} ${CRTM_TEMP}/CloudCoeff/Little_Endian/CloudCoeff.bin ./CloudCoeff.bin
 
+CPR_COEFF=/scratch4/HFIP/hfv3gfs/save/Isaac.Moradi/cpr_coeff
+${NLN} ${CPR_COEFF}/CloudCoeff_DDA_Moradi_2025_670GHz_Thompson2008PSD.nc4 ./CloudCoeff_DDA_Moradi_2025_670GHz_Thompson2008PSD.nc
+${NLN} ${CPR_COEFF}/cpr_earthcare.SpcCoeff.bin ./cpr_earthcare.SpcCoeff.bin
+${NLN} ${CPR_COEFF}/cpr_earthcare.TauCoeff.bin ./cpr_earthcare.TauCoeff.bin
+
 
 # Link GFS/GDAS input and observation files
-radtypes="atms_npp amsua_n19 atms_n20 iasi_metop-b ssmis_f17 abi_g16 abi_g18 amsua_metop-b amsua_n18"
+radtypes="atms_npp amsua_n19 atms_n20 iasi_metop-b ssmis_f17 abi_g16 abi_g18 amsua_metop-b amsua_n18 cpr_earthcare"
 convtypes="adpsfc_specificHumidity_181 adpsfc_stationPressure_181 adpsfc_stationPressure_187 adpsfc_winds_281 adpsfc_winds_287 adpupa_airTemperature_120 adpupa_winds_220 adpupa_specificHumidity_120 aircft_winds_230 aircft_winds_231 aircft_winds_234 aircft_winds_235 aircft_airTemperature_130 aircft_airTemperature_131 satwnd_abi_goes-16 satwnd_abi_goes-18 satwhr_abi_goes-16 satwhr_abi_goes-18 satwhr_abi_goes-19 tldplr_rw_993 aircar_airTemperature_133 aircar_specificHumidity_133 aircar_winds_233 hdob_airTemperature_136 hdob_specificHumidity_136 hdob_winds_236 drpsnd_airTemperature_137 drpsnd_specificHumidity_137 drpsnd_winds_237"
 convfiles="adpsfc adpupa aircft satwnd_abi_goes-16 satwnd_abi_goes-18 satwhr_abi_goes-16 satwhr_abi_goes-18 satwhr_abi_goes-19 tldplr aircar hdob drpsnd"
 mkdir ${DATA}/obs

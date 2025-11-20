@@ -38,6 +38,7 @@ hhprior=$(echo ${CDATEprior} | cut -c9-10)
 
 atmos="atmos/"
 COMINhafs_OBS=${COMINhafs_OBS:-${COMINhafs}/hafs.$PDY/$cyc/${atmos}}
+COMINhafs_CPR_OBS=/scratch3/HFIP/hfv3gfs/save/Isaac.Moradi/data/earthcare/data/CPR/ioda/$yr/$mn/$dy/$cyc
 RUN_ANALYSIS=${RUN_ANALYSIS:-NO}
 ANALYSIS_MODEL=${ANALYSIS_MODEL:-JEDI}
 use_bufr_nr=${use_bufr_nr:-no}
@@ -570,5 +571,19 @@ if [ ${ANALYSIS_MODEL^^} = JEDI ]; then
     ${NCP} ${file} ${intercom}/
   done
 fi
+
+########## Copy EarthCare CPR to ioda dir #################
+# satbias_cpr_earthcare_t00z.nc
+file="cpr_earthcare"
+${NCP} ${COMINhafs_CPR_OBS}/${file}.${PDY}.t${cyc}z.nc4 ${output_dir}/hafs.t${cyc}z.cpr_earthcare.nc
+${NCP} ${COMINhafs_CPR_OBS}/tlapse_${file}.${PDY}.t${cyc}z.txt ${output_dir}/cpr_earthcare.tlapse.txt
+${NCP} ${COMINhafs_CPR_OBS}/satbias_${file}.${PDY}.t${cyc}z.nc4 ${output_dir}/satbias_cpr_earthcare_t${cyc}z.nc
+${NCP} ${COMINhafs_CPR_OBS}/satbias_${file}.${PDY}.t${cyc}z.nc4 ${output_dir}/satbias_cpr_earthcare_t${cyc}z_cov.nc
+
+${NCP} -L ${output_dir}/hafs.t${cyc}z.cpr_earthcare.nc   ${intercom}/
+${NCP} -L ${output_dir}/cpr_earthcare.tlapse.txt ${intercom}/ 
+${NCP} -L ${output_dir}/satbias_cpr_earthcare_t${cyc}z.nc ${intercom}/ 
+${NCP} -L ${output_dir}/satbias_cpr_earthcare_t${cyc}z_cov.nc ${intercom}/
+
 cd ${DATA}
 date

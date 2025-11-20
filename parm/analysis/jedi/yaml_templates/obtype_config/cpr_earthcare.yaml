@@ -1,0 +1,261 @@
+    - obs space:
+        name: CPR EARTHCARE
+        obsdatain:
+          engine:
+            type: H5File
+            obsfile: ./obs/hafs.#HH#.cpr_earthcare.nc
+            missing file action: warn
+          obsgrouping:
+            group variables: ["sequenceNumber"]
+            sort variable: "Layer"
+            sort order: "descending"
+        extension:
+           allocate companion records with length: &num_levels 81
+        obsdataout:
+          engine:
+            type: H5File
+            obsfile: ./hofx/hofx/diag_cpr_earthcare_#HH#.nc
+        simulated variables:
+        - ReflectivityAttenuated
+        channels: 1
+      obs operator:
+        name: CRTM
+        Absorbers:
+        - H2O
+        - O3
+        - CO2
+        Clouds:
+        - LiquidSphere
+        - IceSphere
+        - Rain
+        - Snow
+        Cloud_Fraction: 1.0
+        obs options:
+          Sensor_ID: cpr_earthcare
+          EndianType: little_endian
+          CoefficientPath: crtm/
+          CloudCoeff_File: CloudCoeff_DDA_Moradi_2025_670GHz_Thompson2008PSD.nc4 
+          CloudCoeff_Format: netCDF
+          Cloud_Model: CRTM
+          AerosolCoeff_File: AerosolCoeff.nc4
+          AerosolCoeff_Format: netCDF
+          Aerosol_Model: CRTM
+          ReflectivityUnit: cm6/m3 #cm6/m3 or dBZ
+        linear obs operator:
+          Absorbers:
+          - H2O
+          - O3
+          Clouds:
+          - LiquidSphere
+          - IceSphere
+          - Rain
+          - Snow
+          Surfaces:
+          - Water_Temperature
+          - Land_Temperature
+          - Ice_Temperature
+          - Snow_Temperature
+      obs bias:
+        input file: obs/satbias_cpr_earthcare_#HH#.nc
+        output file: bc/out_satbias_cpr_earthcare_#HH#.nc
+        variational bc:
+          predictors:
+          - name: constant
+          - name: obsMetadataPredictor
+            variable: height
+          - name: obsMetadataPredictor
+            variable: height
+            order: 2
+          - name: sensorScanAngle
+            var_name: sensorScanPosition
+            order: 3
+          - name: sensorScanAngle
+            var_name: sensorScanPosition
+            order: 2
+          - name: sensorScanAngle
+            var_name: sensorScanPosition
+        covariance:
+          minimal required obs number: 20
+          variance range:
+          - 1.0e-08
+          - 1.0e-01
+          step size: 1.0e-04
+          largest analysis variance: 100.0
+          prior:
+            input file: obs/satbias_cpr_earthcare_#HH#_cov.nc
+            inflation:
+              ratio: 1.05
+              ratio for small dataset: 1.5
+          output file: bc/out_satbias_cpr_earthcare_#HH#_cov.nc
+      obs prior filters:
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/latitude
+            type: float
+            function:
+              name: ObsFunction/FillAveragedProfileData
+              options:
+                variable to copy: MetaData/latitude
+                observation vertical coordinate: MetaData/height
+                model vertical coordinate: air_pressure_levels
+          - name: MetaData/longitude
+            type: float
+            function:
+              name: ObsFunction/FillAveragedProfileData
+              options:
+                variable to copy: MetaData/longitude
+                observation vertical coordinate: MetaData/height
+                model vertical coordinate: air_pressure_levels
+          - name: MetaData/sensorScanPosition
+            type: float
+            function:
+              name: ObsFunction/FillAveragedProfileData
+              options:
+                variable to copy: MetaData/sensorScanPosition
+                observation vertical coordinate: MetaData/height
+                model vertical coordinate: air_pressure_levels
+          - name: MetaData/sensorViewAngle
+            type: float
+            function:
+              name: ObsFunction/FillAveragedProfileData
+              options:
+                variable to copy: MetaData/sensorViewAngle
+                observation vertical coordinate: MetaData/height
+                model vertical coordinate: air_pressure_levels
+          - name: MetaData/sensorZenithAngle
+            type: float
+            function:
+              name: ObsFunction/FillAveragedProfileData
+              options:
+                variable to copy: MetaData/sensorZenithAngle
+                observation vertical coordinate: MetaData/height
+                model vertical coordinate: air_pressure_levels
+      - filter: Domain Check
+        filter variables:
+        - name: ReflectivityAttenuated 
+          channels: 1
+        where:
+        - variable:
+            name: MetaData/sensorScanPosition
+          minvalue: -70
+          maxvalue: 70
+        - variable:
+            name: MetaData/latitude
+          minvalue: -90.0
+          maxvalue: 90.0
+        - variable:
+            name: MetaData/height
+          minvalue: 1000.0
+          maxvalue: 30000.0
+      - filter: Bounds Check
+        filter variables:
+        - name: ObsValue/ReflectivityAttenuated
+          channels: 1
+        minvalue: -30.0  # still in dBZ
+        maxvalue: 70.0
+      - filter: Variable Transforms
+        Transform: ReflectivityUnitConvert
+        transform variable:
+          name: ObsValue/ReflectivityAttenuated
+          channels: 1
+        input_unit: dBZ
+        output_unit: cm6/m3
+        output variable: 
+          name: ObsValue/ReflectivityAttenuated
+          channels: 1
+      - filter: Average Observations To GeoVals Model Levels
+        filter variables:
+        - name: ObsValue/ReflectivityAttenuated
+          channels: 1
+        observation vertical coordinate: MetaData/height
+        model vertical coordinate: GeoVaLs/geopotential_height_levels
+      - filter: Bounds Check
+        filter variables:
+        - name: DerivedObsValue/ReflectivityAttenuated
+          channels: 1
+        minvalue: 3.0e-010 #15 dbz -> cm**6/m**3
+        #minvalue: 15.0 # dBZ
+        maxvalue: 10.0 #-> 70 dBZ -> cm**6/m**3
+        #maxvalue: 70.0 # dBZ
+      - filter: Perform Action
+        filter variables:
+        - name: DerivedObsValue/ReflectivityAttenuated
+          channels: 1
+        action:
+          name: assign error
+          error function:
+            name: ObsFunction/Arithmetic
+            channels: 1
+            options:
+              variables:
+              - name: DerivedObsValue/ReflectivityAttenuated
+                channels: 1
+              coefs: [0.15]
+              intercept: 1.0e-6 # this also defines the base
+      obs post filters:
+      - filter: Background Check
+        apply at iterations: 0, 1
+        filter variables:
+        - name: ReflectivityAttenuated
+          channels: 1
+        threshold: 5.0 # 5 times the error 
+        #absolute threshold: 9.0e-04 # cm**6/m**3 or almost 10 dBZ from 20dBZ 30dBZ 
+        #absolute threshold: 10.0 # dBZ
+        action:
+          name: reject 
+      - filter: Background Check
+        apply at iterations: 0, 1
+        filter variables:
+        - name: ReflectivityAttenuated
+          channels: 1
+        threshold: 1.0 # times the obs error 
+        action:
+          name: inflate error
+          inflation factor: 2.0
+      - filter: Background Check
+        apply at iterations: 0, 1
+        filter variables:
+        - name: ReflectivityAttenuated
+          channels: 1
+        threshold: 2.0 
+        action:
+          name: inflate error
+          inflation factor: 3.0
+      - filter: Background Check
+        apply at iterations: 0, 1
+        filter variables:
+        - name: ReflectivityAttenuated
+          channels: 1
+        threshold: 3.0 
+        action:
+          name: inflate error
+          inflation factor: 4.0
+
+      #- filter: Variable Assignment
+      #  where:
+      #  - variable:
+      #      name: HofX/ReflectivityAttenuated
+      #      channels: 1
+      #    maxvalue: -500.0
+      #  assignments:
+      #  - name: HofX/ReflectivityAttenuated
+      #    channels: 1
+      #    type: float
+      #    value: missing
+
+      #- filter: Print Filter Data
+      #  message: Printing filter data before the Background Check has run.
+      #  where:
+      #  - variable:
+      #      name: MetaData/actObsAvgQC
+      #    is_in: 1  # good data
+      #  variables:
+      #  - variable: 
+      #      name: DerivedObsValue/ReflectivityAttenuated
+      #      channels: 1
+      #  - variable: ObsValue/ReflectivityAttenuated_1
+      #  - variable: HofX/ReflectivityAttenuated_1
+      #  - variable: QCflagsData/ReflectivityAttenuated_1
+      #  - variable: ObsBiasData/ReflectivityAttenuated_1
+      #  - variable: ObsErrorData/ReflectivityAttenuated_1
+      #  minimum location: 7193300

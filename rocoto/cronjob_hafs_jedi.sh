@@ -7,6 +7,7 @@ source ${HOMEhafs}/ush/hafs_pre_job.sh.inc
 
 cd ${HOMEhafs}/rocoto
 EXPT=$(basename ${HOMEhafs})
+
 #opts="-t -s sites/${WHERE_AM_I:-wcoss2}.ent -f"
 opts="-t -f"
 #===============================================================================
@@ -17,6 +18,12 @@ opts="-t -f"
 #./run_hafs.py ${opts} 2024092406-2024092412 09L HISTORY ${confopts} \
 #   config.NHRS=126 config.scrub_work=no config.scrub_com=no config.run_emcgraphics=yes
 #===============================================================================
+ # 2025 NATL Storm
+./run_hafs.py ${opts} 2025081112-2025082300 05L HISTORY ${confopts} # ERIN
+#./run_hafs.py ${opts} 2025091718-2025092612 07L HISTORY ${confopts} # GABRIELLE
+#./run_hafs.py ${opts} 2025092418-2025100112 08L HISTORY ${confopts} # HUMBERTO
+#./run_hafs.py ${opts} 2025102112-2025103112 13L HISTORY ${confopts} # MELISSA
+
  # 2024 NATL Storms
 #./run_hafs.py ${opts} 2024061712-2024062012 01L HISTORY ${confopts} # Alberto
 #./run_hafs.py ${opts} 2024062818-2024070818 02L HISTORY ${confopts} # Beryl
@@ -56,7 +63,7 @@ opts="-t -f"
 #./run_hafs.py ${opts} 2023090512-2023091606 13L HISTORY ${confopts} # Lee part 1
 #./run_hafs.py ${opts} 2023091618-2023091712 13L HISTORY ${confopts} # Lee part 2
 #./run_hafs.py ${opts} 2023090712-2023091712 14L HISTORY ${confopts} # Margot
-./run_hafs.py ${opts} 2023091512-2023092206 15L HISTORY ${confopts} # Nigel
+#./run_hafs.py ${opts} 2023091512-2023092206 15L HISTORY ${confopts} # Nigel
 #./run_hafs.py ${opts} 2023092112-2023092318 16L HISTORY ${confopts} # Ophelia
 #./run_hafs.py ${opts} 2023092312-2023100612 17L HISTORY ${confopts} # Philippe
 #./run_hafs.py ${opts} 2023092812-2023100200 18L HISTORY ${confopts} # Rina
