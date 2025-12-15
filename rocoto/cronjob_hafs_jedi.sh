@@ -12,7 +12,8 @@ EXPT=$(basename ${HOMEhafs})
 opts="-t -f"
 #===============================================================================
 # HAFSv2.1.1A final configuration
- confopts="config.EXPT=${EXPT} config.SUBEXPT=${EXPT} ../parm/hafsv2p1p1j_final.conf"
+ ##confopts="config.EXPT=${EXPT} config.SUBEXPT=${EXPT} config.analysis_d01=yes config.analysis_d02=yes ../parm/hafsv2p1p1j_final.conf"
+ confopts="config.EXPT=${EXPT} config.SUBEXPT=${EXPT} config.scrub_work=no config.scrub_com=no config.run_emcgraphics=yes ../parm/hafsv2p1p1j_final.conf"
  ##confopts="config.run_atm_init_ens=yes config.EXPT=${EXPT} config.SUBEXPT=${EXPT}_v2p1p1a_final ../parm/hafsv2p1p1a_final.conf"
 ## Technical testing for Helene 09L2024
 #./run_hafs.py ${opts} 2024092406-2024092412 09L HISTORY ${confopts} \

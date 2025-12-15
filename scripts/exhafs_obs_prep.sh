@@ -538,7 +538,7 @@ if [ ${ANALYSIS_MODEL^^} = JEDI ]; then
      	  echo "Info: Subset ${SUBSET_TO_FIND} was not found. Skipping Python script."
         fi
       elif [[ "${bufr}" = "tldplr" ]]; then
-        python bufr_${file}.py gfs.t${cyc}z.${bufr}.bufr_d bufr_${file}_mapping.yaml output/hafs.t${cyc}z.${file}.nc
+        python bufr_${file}.py gfs.t${cyc}z.${bufr}.bufr_d bufr_${file}_mapping.yaml output/hafs.t${cyc}z.${file}.nc ${CDATE}
       elif [[ "${bufr}" = "hdobbufr" ]] || [[ "${bufr}" = "drpsnd" ]]; then
         python bufr_${file}.py gfs.t${cyc}z.${bufr}.bufr_d bufr_${file}_mapping.yaml output/hafs.t${cyc}z.${file}.nc ${CDATE}
       else

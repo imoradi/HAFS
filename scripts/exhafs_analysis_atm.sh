@@ -350,9 +350,10 @@ ${NLN} ${CRTM_TEMP}/AerosolCoeff/Little_Endian/AerosolCoeff.bin ./AerosolCoeff.b
 ${NLN} ${CRTM_TEMP}/CloudCoeff/Little_Endian/CloudCoeff.bin ./CloudCoeff.bin
 
 CPR_COEFF=/scratch4/HFIP/hfv3gfs/save/Isaac.Moradi/cpr_coeff
-${NLN} ${CPR_COEFF}/CloudCoeff_DDA_Moradi_2025_670GHz_Thompson2008PSD.nc4 ./CloudCoeff_DDA_Moradi_2025_670GHz_Thompson2008PSD.nc
+${NLN} ${CPR_COEFF}/CloudCoeff_DDA_Moradi_2025_670GHz_Thompson2008PSD.nc4 ./CloudCoeff_DDA_Moradi_2025_670GHz_Thompson2008PSD.nc4
 ${NLN} ${CPR_COEFF}/cpr_earthcare.SpcCoeff.bin ./cpr_earthcare.SpcCoeff.bin
 ${NLN} ${CPR_COEFF}/cpr_earthcare.TauCoeff.bin ./cpr_earthcare.TauCoeff.bin
+${NLN} ${CRTM_TEMP}/AerosolCoeff/netCDF/AerosolCoeff.nc4 ./AerosolCoeff.nc4
 
 
 # Link GFS/GDAS input and observation files

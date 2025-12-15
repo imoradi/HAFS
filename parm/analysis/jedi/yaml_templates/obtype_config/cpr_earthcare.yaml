@@ -3,7 +3,7 @@
         obsdatain:
           engine:
             type: H5File
-            obsfile: ./obs/hafs.#HH#.cpr_earthcare.nc
+            obsfile: obs/hafs.#HH#.cpr_earthcare.nc
             missing file action: warn
           obsgrouping:
             group variables: ["sequenceNumber"]
@@ -14,21 +14,22 @@
         obsdataout:
           engine:
             type: H5File
-            obsfile: ./hofx/hofx/diag_cpr_earthcare_#HH#.nc
-        simulated variables:
-        - ReflectivityAttenuated
+            obsfile: hofx/diag_cpr_earthcare_#HH#.nc
+        io pool:
+          max pool size: #TOTAL_TASKS#
+        simulated variables: [ReflectivityAttenuated]
+        observed variables: [ReflectivityAttenuated]
         channels: 1
       obs operator:
         name: CRTM
         Absorbers:
         - H2O
         - O3
-        - CO2
         Clouds:
         - LiquidSphere
         - IceSphere
         - Rain
-        - Snow
+        - LargeColumnAggregate
         Cloud_Fraction: 1.0
         obs options:
           Sensor_ID: cpr_earthcare
@@ -41,6 +42,7 @@
           AerosolCoeff_Format: netCDF
           Aerosol_Model: CRTM
           ReflectivityUnit: cm6/m3 #cm6/m3 or dBZ
+            
         linear obs operator:
           Absorbers:
           - H2O
@@ -49,7 +51,7 @@
           - LiquidSphere
           - IceSphere
           - Rain
-          - Snow
+          - LargeColumnAggregate
           Surfaces:
           - Water_Temperature
           - Land_Temperature
@@ -87,6 +89,21 @@
               ratio: 1.05
               ratio for small dataset: 1.5
           output file: bc/out_satbias_cpr_earthcare_#HH#_cov.nc
+      obs pre filters:
+      - filter: Domain Check
+        apply at iterations: 0,1
+        where:
+        - variable:
+            name: MetaData/latitude
+          minvalue: #MIN_LAT#
+          maxvalue: #MAX_LAT#
+      - filter: Domain Check
+        apply at iterations: 0,1
+        where:
+        - variable:
+            name: MetaData/longitude
+          minvalue: #MIN_LON#
+          maxvalue: #MAX_LON#
       obs prior filters:
       - filter: Variable Assignment
         assignments:
@@ -130,6 +147,30 @@
                 variable to copy: MetaData/sensorZenithAngle
                 observation vertical coordinate: MetaData/height
                 model vertical coordinate: air_pressure_levels
+          - name: MetaData/sensorAzimuthAngle
+            type: float
+            function:
+              name: ObsFunction/FillAveragedProfileData
+              options:
+                variable to copy: MetaData/sensorAzimuthAngle
+                observation vertical coordinate: MetaData/height
+                model vertical coordinate: air_pressure_levels
+          - name: MetaData/solarZenithAngle
+            type: float
+            function:
+              name: ObsFunction/FillAveragedProfileData
+              options:
+                variable to copy: MetaData/solarZenithAngle
+                observation vertical coordinate: MetaData/height
+                model vertical coordinate: air_pressure_levels
+          - name: MetaData/solarAzimuthAngle
+            type: float
+            function:
+              name: ObsFunction/FillAveragedProfileData
+              options:
+                variable to copy: MetaData/solarAzimuthAngle
+                observation vertical coordinate: MetaData/height
+                model vertical coordinate: air_pressure_levels
       - filter: Domain Check
         filter variables:
         - name: ReflectivityAttenuated 
@@ -145,13 +186,13 @@
           maxvalue: 90.0
         - variable:
             name: MetaData/height
-          minvalue: 1000.0
+          minvalue: 0.0
           maxvalue: 30000.0
       - filter: Bounds Check
         filter variables:
         - name: ObsValue/ReflectivityAttenuated
           channels: 1
-        minvalue: -30.0  # still in dBZ
+        minvalue: -35.0  # still in dBZ
         maxvalue: 70.0
       - filter: Variable Transforms
         Transform: ReflectivityUnitConvert
@@ -173,10 +214,8 @@
         filter variables:
         - name: DerivedObsValue/ReflectivityAttenuated
           channels: 1
-        minvalue: 3.0e-010 #15 dbz -> cm**6/m**3
-        #minvalue: 15.0 # dBZ
+        minvalue: 3.16e-10 #-35 dbz -> cm**6/m**3
         maxvalue: 10.0 #-> 70 dBZ -> cm**6/m**3
-        #maxvalue: 70.0 # dBZ
       - filter: Perform Action
         filter variables:
         - name: DerivedObsValue/ReflectivityAttenuated
@@ -193,59 +232,28 @@
               coefs: [0.15]
               intercept: 1.0e-6 # this also defines the base
       obs post filters:
-      - filter: Background Check
-        apply at iterations: 0, 1
+      - filter: Bounds Check
         filter variables:
         - name: ReflectivityAttenuated
           channels: 1
-        threshold: 5.0 # 5 times the error 
-        #absolute threshold: 9.0e-04 # cm**6/m**3 or almost 10 dBZ from 20dBZ 30dBZ 
-        #absolute threshold: 10.0 # dBZ
-        action:
-          name: reject 
-      - filter: Background Check
-        apply at iterations: 0, 1
+        test variables:
+        - name: GeoVaLs/observable_domain_mask
+          flag all filter variables if any test variable is out of bounds: true
+          minvalue: 0.0
+          maxvalue: 0.5
+      - filter: Bounds Check
         filter variables:
-        - name: ReflectivityAttenuated
+        - name: HofX/ReflectivityAttenuated
           channels: 1
-        threshold: 1.0 # times the obs error 
-        action:
-          name: inflate error
-          inflation factor: 2.0
-      - filter: Background Check
-        apply at iterations: 0, 1
-        filter variables:
-        - name: ReflectivityAttenuated
-          channels: 1
-        threshold: 2.0 
-        action:
-          name: inflate error
-          inflation factor: 3.0
-      - filter: Background Check
-        apply at iterations: 0, 1
-        filter variables:
-        - name: ReflectivityAttenuated
-          channels: 1
-        threshold: 3.0 
-        action:
-          name: inflate error
-          inflation factor: 4.0
-
-      #- filter: Variable Assignment
-      #  where:
-      #  - variable:
-      #      name: HofX/ReflectivityAttenuated
-      #      channels: 1
-      #    maxvalue: -500.0
-      #  assignments:
-      #  - name: HofX/ReflectivityAttenuated
-      #    channels: 1
-      #    type: float
-      #    value: missing
-
+        minvalue: 0.0  # cm^6/m^3
+        maxvalue: 10.0 # cm^6/m^3
       #- filter: Print Filter Data
       #  message: Printing filter data before the Background Check has run.
       #  where:
+      #  - variable:
+      #      name: QCflagsData/ReflectivityAttenuated
+      #      channels: 1  
+      #    is_in: 1  # good data
       #  - variable:
       #      name: MetaData/actObsAvgQC
       #    is_in: 1  # good data
@@ -258,4 +266,74 @@
       #  - variable: QCflagsData/ReflectivityAttenuated_1
       #  - variable: ObsBiasData/ReflectivityAttenuated_1
       #  - variable: ObsErrorData/ReflectivityAttenuated_1
-      #  minimum location: 7193300
+      #  - variable: GeoVaLs/mass_content_of_cloud_liquid_water_in_atmosphere_layer
+      #    levels: 50-80
+      #  - variable: GeoVaLs/mass_content_of_cloud_ice_in_atmosphere_layer 
+      #    levels: 50-80
+      #  - variable: GeoVaLs/mass_content_of_rain_in_atmosphere_layer
+      #    levels: 50-80
+      #  - variable: GeoVaLs/mass_content_of_snow_in_atmosphere_layer
+      #    levels: 50-80
+      #  - variable: GeoVaLs/mass_content_of_graupel_in_atmosphere_layer   
+      #    levels: 50-80
+      #  - variable: GeoVaLs/geopotential_height_levels   
+      #    levels: 50, 60, 70, 80
+      #  - variable: GeoVaLs/air_temperature   
+      #    levels: 50, 60, 70, 80
+      #  - variable: GeoVaLs/air_pressure   
+      #    levels: 50, 60, 70, 80
+      #  - variable: GeoVaLs/air_pressure_levels   
+      #    levels: 50, 60, 70, 80
+      #  - variable: GeoVaLs/water_vapor_mixing_ratio_wrt_dry_air   
+      #    levels: 50, 60, 70, 80
+      #  - variable: MetaData/latitude
+      #  - variable: MetaData/longitude
+      #  - variable: MetaData/height
+      #  - variable: MetaData/modelLayer
+      #  #minimum location: 7193300
+      - filter: Background Check
+        apply at iterations: 0, 1, 2
+        filter variables:
+        - name: ReflectivityAttenuated
+          channels: 1
+        absolute threshold: 9.0e-04 # cm**6/m**3 or almost 10 dBZ from 20dBZ 30dBZ 
+        action:
+          name: passivate 
+      - filter: Background Check
+        apply at iterations: 0, 1, 2
+        filter variables:
+        - name: ReflectivityAttenuated
+          channels: 1
+        threshold: 3.0 # 100 times the error 
+        action:
+          name: passivate 
+      - filter: Background Check
+        apply at iterations: 0, 1, 2
+        filter variables:
+        - name: ReflectivityAttenuated
+          channels: 1
+        threshold: 1.0 # times the obs error 
+        action:
+          name: inflate error
+          inflation factor: 2.0
+      - filter: Background Check
+        apply at iterations: 0, 1, 2
+        filter variables:
+        - name: ReflectivityAttenuated
+          channels: 1
+        threshold: 2.0 
+        action:
+          name: inflate error
+          inflation factor: 3.0
+      - filter: Perform Action
+        filter variables:
+        - name: ReflectivityAttenuated
+          channels: 1
+        where:
+        - variable:
+            name: MetaData/height
+          minvalue: 0
+          maxvalue: 90000 # 1000 
+        action:
+          name: passivate
+        defer to post: true
