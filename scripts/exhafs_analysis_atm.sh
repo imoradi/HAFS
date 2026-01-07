@@ -47,6 +47,14 @@ MAX_LAT=$(echo "$cenlat +  8" | bc)
 DATOOL=${DATOOL:-${EXEChafs}/hafs_tools_datool.x}
 MERGE_CMD="${APRUNS} ${DATOOL} remap"
 
+
+# Temporary fix for the domain - Isaac Moradi
+#MIN_LON=-100
+#MAX_LON=-25
+#MIN_LAT=10
+#MAX_LAT=50
+#===========================================
+
 export PARMjedi=${PARMjedi:-${PARMhafs}/analysis/jedi}
 export FIXcrtm=${FIXcrtm:-${CRTM_FIX:?}}
 export COMINgfs=${COMINgfs:?}

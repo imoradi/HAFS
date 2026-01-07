@@ -21,7 +21,7 @@ opts="-t -f"
 #===============================================================================
  # 2025 NATL Storm
 #./run_hafs.py ${opts} 2025081112-2025082300 05L HISTORY ${confopts} # ERIN
-#./run_hafs.py ${opts} 2025091718-2025092612 07L HISTORY ${confopts} # GABRIELLE
+./run_hafs.py ${opts} 2025091718-2025092612 07L HISTORY ${confopts} # GABRIELLE
 #./run_hafs.py ${opts} 2025092418-2025100112 08L HISTORY ${confopts} # HUMBERTO
 #./run_hafs.py ${opts} 2025102112-2025103112 13L HISTORY ${confopts} # MELISSA
 
