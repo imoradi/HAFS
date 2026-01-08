@@ -108,10 +108,10 @@
         assignments:
         - name: MetaData/latitude
           type: float
-          value: missing  
+          value: -1.0e04  
         - name: MetaData/longitude
           type: float
-          value: missing  
+          value: -1.0e04
       - filter: Domain Check
         apply at iterations: 0,1,2
         where:

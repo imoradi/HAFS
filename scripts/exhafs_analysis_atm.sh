@@ -49,10 +49,10 @@ MERGE_CMD="${APRUNS} ${DATOOL} remap"
 
 
 # Temporary fix for the domain - Isaac Moradi
-#MIN_LON=-100
-#MAX_LON=-25
-#MIN_LAT=10
-#MAX_LAT=50
+MIN_LON=-100
+MAX_LON=-25
+MIN_LAT=10
+MAX_LAT=50
 #===========================================
 
 export PARMjedi=${PARMjedi:-${PARMhafs}/analysis/jedi}
